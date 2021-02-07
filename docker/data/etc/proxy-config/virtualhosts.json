@@ -1,0 +1,9 @@
+[
+  {
+    "bucket": "a.ppy.sh",
+    "region": "us-west-1",
+    "hostnames": [
+      "a.ppy.sh"
+    ]
+  }
+]

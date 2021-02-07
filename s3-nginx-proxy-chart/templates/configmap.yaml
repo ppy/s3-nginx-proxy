@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "s3-nginx-proxy-chart.fullname" . }}
+  labels:
+    {{- include "s3-nginx-proxy-chart.labels" . | nindent 4 }}
+data:
+  virtualhosts.json: {{ .Values.virtualHosts | toJson | quote }}
+  cache.json: {{ .Values.cache | toJson | quote }}

@@ -1,0 +1,4 @@
+{
+  "sizeLimit": "5Gi",
+  "expiry": "60m"
+}
