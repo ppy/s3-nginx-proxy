@@ -13,7 +13,22 @@ A feature-rich Amazon S3 NGINX-based proxy, running in Docker and Kubernetes.
 
 # Usage
 
-Create AWS S3 access key and secret keys, allowed to download from your buckets. Bucket listing will also be served, so make sure to disable that permission if necessary.
+Recommended setup is to create an AWS IAM user for each `s3-nginx-proxy` deployment. You should then attach a policy to exclusively grant it the `GetObject` permission on the required buckets, such as:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::thepoon.ppy.sh/*"
+    }
+  ]
+}
+```
+
+Granting too much permissions may lead to security risks (such as listing the entire bucket content). Be careful!
 
 ## Docker
 
