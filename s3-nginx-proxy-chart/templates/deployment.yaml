@@ -39,8 +39,12 @@ spec:
             sizeLimit: 10Mi
         - name: nginx-cache
           emptyDir:
-            medium: {{ .Values.cache.medium }}
-            sizeLimit: {{ .Values.cache.sizeLimit }}
+            {{- with .Values.cache.medium }}
+            medium: {{ . }}
+            {{- end }}
+            {{- with .Values.cache.sizeLimit }}
+            sizeLimit: {{ . }}
+            {{- end }}
       containers:
         - name: {{ .Chart.Name }}-nginx
           securityContext:

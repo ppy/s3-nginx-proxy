@@ -13,7 +13,7 @@ virtualHosts:
     region: us-west-1
 
 cache:
-  medium: Default
+  # medium: Memory
   sizeLimit: 5Gi
   expiry: 60m
 
