@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+{{- $kind := .Values.kind | default "Deployment" | quote }}
+kind: {{ $kind }}
 metadata:
   name: {{ include "s3-nginx-proxy-chart.fullname" . }}
   labels:
     {{- include "s3-nginx-proxy-chart.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if and (eq $kind "Deployment") (not .Values.autoscaling.enabled) }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:

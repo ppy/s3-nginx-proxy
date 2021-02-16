@@ -17,6 +17,7 @@ cache:
   sizeLimit: 5Gi
   expiry: 60m
 
+kind: Deployment # DaemonSet is also supported
 replicaCount: 1
 
 image:
