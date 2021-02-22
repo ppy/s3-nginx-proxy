@@ -39,7 +39,7 @@ server {
     add_header Cache-Control public;
     expires ${cache.expiry};
     proxy_cache cache;
-    proxy_cache_key "${virtualHost.bucket}$uri";
+    proxy_cache_key "${virtualHost.bucket}$request_uri";
 
     proxy_set_header       Date          "$now";
     proxy_set_header       Host          "${virtualHost.bucket}.s3.amazonaws.com";
