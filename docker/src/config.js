@@ -32,7 +32,7 @@ server {
     }
 
     set_by_lua        $now            "return ngx.cookie_time(ngx.time())";
-    set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$request_uri";
+    set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$uri";
     set_hmac_sha1     $aws_signature  "${S3_SECRET_KEY}" "$string_to_sign";
     set_encode_base64 $aws_signature  "$aws_signature";
 
@@ -46,6 +46,7 @@ server {
     proxy_set_header       Authorization "AWS ${S3_ACCESS_KEY}:$aws_signature";
     proxy_buffering        on;
     proxy_intercept_errors on;
+    rewrite .* $uri break;
     proxy_pass             "https://s3-${virtualHost.region}.amazonaws.com";
   }
 }
