@@ -4,6 +4,7 @@
     "region": "us-west-1",
     "hostnames": [
       "a.ppy.sh"
-    ]
+    ],
+    "defaultPath": "/blank.png"
   }
 ]

@@ -11,6 +11,7 @@ virtualHosts:
       - a.ppy.sh
     bucket: a.ppy.sh
     region: us-west-1
+    defaultPath: /blank.png
 
 cache:
   # medium: Memory

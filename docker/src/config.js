@@ -40,6 +40,8 @@ server {
     expires ${cache.expiry};
     proxy_cache cache;
     proxy_cache_key "${virtualHost.bucket}$request_uri";
+    ${virtualHost.defaultPath ? `error_page 403 =404 "${virtualHost.defaultPath}";` : ""}
+    ${virtualHost.defaultPath ? `error_page 404 "${virtualHost.defaultPath}";` : ""}
 
     proxy_set_header       Date          "$now";
     proxy_set_header       Host          "${virtualHost.bucket}.s3.amazonaws.com";
