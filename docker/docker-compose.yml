@@ -7,6 +7,8 @@ services:
       - 127.0.0.1:80:80
     volumes:
       - ./data/etc/nginx/http.d:/etc/nginx/http.d
+      - ./data/etc/proxy-config:/etc/proxy-config
+      - ./data/etc/s3-credentials:/etc/s3-credentials
   config:
     image: pppy/s3-nginx-proxy
     command: /srv/config.sh

@@ -65,6 +65,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+            - name: s3-credentials
+              mountPath: /etc/s3-credentials
+            - name: proxy-config
+              mountPath: /etc/proxy-config
             - name: nginx-httpd
               mountPath: /etc/nginx/http.d
             - name: nginx-cache
