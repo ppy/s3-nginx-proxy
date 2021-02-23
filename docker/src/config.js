@@ -17,6 +17,10 @@ const configBlocks = [];
 configBlocks.push(`
 proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:10m max_size=${cache.sizeLimit} inactive=${cache.expiry} use_temp_path=off;
 proxy_cache_valid 200 302 ${cache.expiry};
+
+map $request_uri $uri_path {
+  "~^(?P<path>.*?)(\\?.*)*$"  $path;
+}
 `);
 
 for(const virtualHost of virtualHosts) {
@@ -32,7 +36,7 @@ server {
     }
 
     set_by_lua        $now            "return ngx.cookie_time(ngx.time())";
-    set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$uri";
+    set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$uri_path";
     set_hmac_sha1     $aws_signature  "${S3_SECRET_KEY}" "$string_to_sign";
     set_encode_base64 $aws_signature  "$aws_signature";
 
