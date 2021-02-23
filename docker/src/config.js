@@ -21,6 +21,8 @@ proxy_cache_valid 200 302 ${cache.expiry};
 map $request_uri $uri_path {
   "~^(?P<path>.*?)(\\?.*)*$"  $path;
 }
+
+include resolvers.conf;
 `);
 
 for(const virtualHost of virtualHosts) {
@@ -52,8 +54,7 @@ server {
     proxy_set_header       Authorization "AWS ${S3_ACCESS_KEY}:$aws_signature";
     proxy_buffering        on;
     proxy_intercept_errors on;
-    rewrite .* $uri break;
-    proxy_pass             "https://s3-${virtualHost.region}.amazonaws.com";
+    proxy_pass             "https://s3-${virtualHost.region}.amazonaws.com$uri_path";
   }
 }
 `);

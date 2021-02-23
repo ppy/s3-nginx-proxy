@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo resolver $(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf) ";" > /etc/nginx/resolvers.conf # https://serverfault.com/a/638855
+
 sed -i -E "s/^([\t| ]{0,})error_log.+$/\1error_log stderr warn;/" /etc/nginx/nginx.conf
 sed -i -E "s/^([\t| ]{0,})access_log.+$/\1access_log off;/"       /etc/nginx/nginx.conf
 
