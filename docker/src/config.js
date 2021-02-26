@@ -44,6 +44,9 @@ server {
       deny all;
     }
 
+    set_by_lua_block $uri_path {
+      return ngx.var.uri_path:gsub("+", "%%2B");
+    }
     set_by_lua        $now            "return ngx.cookie_time(ngx.time())";
     set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$uri_path";
     set_hmac_sha1     $aws_signature  "${S3_SECRET_KEY}" "$string_to_sign";

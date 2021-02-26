@@ -6,5 +6,12 @@
       "a.ppy.sh"
     ],
     "defaultPath": "/blank.png"
+  },
+  {
+    "bucket": "assets.ppy.sh",
+    "region": "us-west-1",
+    "hostnames": [
+      "assets.ppy.sh"
+    ]
   }
 ]
