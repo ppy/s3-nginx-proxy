@@ -35,7 +35,7 @@ spec:
         - name: proxy-config
           configMap:
             name: {{ include "s3-nginx-proxy-chart.fullname" . }}
-        - name: nginx-httpd
+        - name: nginx-confd
           emptyDir:
             sizeLimit: 10Mi
         - name: nginx-cache
@@ -69,8 +69,8 @@ spec:
               mountPath: /etc/s3-credentials
             - name: proxy-config
               mountPath: /etc/proxy-config
-            - name: nginx-httpd
-              mountPath: /etc/nginx/http.d
+            - name: nginx-confd
+              mountPath: /etc/nginx/conf.d
             - name: nginx-cache
               mountPath: /var/cache/nginx
         - name: {{ .Chart.Name }}-config
@@ -84,8 +84,8 @@ spec:
               mountPath: /etc/s3-credentials
             - name: proxy-config
               mountPath: /etc/proxy-config
-            - name: nginx-httpd
-              mountPath: /etc/nginx/http.d
+            - name: nginx-confd
+              mountPath: /etc/nginx/conf.d
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
