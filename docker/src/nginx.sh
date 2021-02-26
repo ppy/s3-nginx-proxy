@@ -9,7 +9,7 @@ echo 'Starting nginx config script...'
 node /srv/config.js
 
 echo 'Starting nginx...'
-nginx -g 'daemon off;' &
+openresty -p /var/lib/nginx -c /etc/nginx/nginx.conf -g 'daemon off;' &
 PID=$!
 
 # reload on config edit

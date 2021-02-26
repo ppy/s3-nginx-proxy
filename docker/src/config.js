@@ -60,6 +60,6 @@ server {
 `);
 }
 
-fs.writeFileSync("/etc/nginx/http.d/s3-proxy.conf", configBlocks.join(""));
+fs.writeFileSync("/etc/nginx/conf.d/s3-proxy.conf", configBlocks.join(""));
 
 console.log("Successfully generated config!");
