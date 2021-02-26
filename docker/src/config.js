@@ -32,6 +32,13 @@ server {
 
   server_name "${virtualHost.hostnames.join('" "')}";
 
+  proxy_cache cache;
+  proxy_cache_key "${virtualHost.bucket}$request_uri";
+  proxy_buffering on;
+
+  add_header Cache-Control public;
+  expires 60m;
+
   location / {
     limit_except GET {
       deny all;
@@ -42,20 +49,22 @@ server {
     set_hmac_sha1     $aws_signature  "${S3_SECRET_KEY}" "$string_to_sign";
     set_encode_base64 $aws_signature  "$aws_signature";
 
-    add_header Cache-Control public;
-    expires ${cache.expiry};
-    proxy_cache cache;
-    proxy_cache_key "${virtualHost.bucket}$request_uri";
-    ${virtualHost.defaultPath ? `error_page 403 =404 "${virtualHost.defaultPath}";` : ""}
-    ${virtualHost.defaultPath ? `error_page 404 "${virtualHost.defaultPath}";` : ""}
+    ${virtualHost.defaultPath ? `error_page 403 @fallback;` : ""}
+    ${virtualHost.defaultPath ? `error_page 404 @fallback;` : ""}
 
     proxy_set_header       Date          "$now";
     proxy_set_header       Host          "${virtualHost.bucket}.s3.amazonaws.com";
     proxy_set_header       Authorization "AWS ${S3_ACCESS_KEY}:$aws_signature";
-    proxy_buffering        on;
     proxy_intercept_errors on;
     proxy_pass             "https://s3-${virtualHost.region}.amazonaws.com$uri_path";
   }
+
+  ${virtualHost.defaultPath ? `
+    location @fallback {
+      rewrite ^ "${virtualHost.defaultPath}";
+      set $uri_path "${virtualHost.defaultPath}";
+    }
+  `: ""}
 }
 `);
 }
