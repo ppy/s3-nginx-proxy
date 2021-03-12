@@ -5,17 +5,39 @@ const S3_SECRET_KEY = fs.readFileSync("/etc/s3-credentials/s3SecretKey").toStrin
 const virtualHosts = require("/etc/proxy-config/virtualhosts.json");
 
 const cache = require("/etc/proxy-config/cache.json");
-const cacheParsedSizeLimit = /^(\d{0,})(G|M)i$/.exec(cache.sizeLimit); // [1] is size, [2] is unit
-if(cacheParsedSizeLimit) {
-  // convert size limit from kubernetes format to nginx, plus apply a safety margin (10%)
-  // eg: 5Gi -> 4g
-  cache.sizeLimit = `${Math.trunc(Number(cacheParsedSizeLimit[1]) * 0.9)}${cacheParsedSizeLimit[2].toLowerCase()}`;
+
+// parse kubernetes-style volume size to nginx
+function parseSize(kubernetesSize) {
+  const cacheParsedSizeLimit = /^(\d{0,})((G|M)i?)$/.exec(kubernetesSize); // [1] is size, [2] is unit
+  if(cacheParsedSizeLimit) {
+    let size = Number(cacheParsedSizeLimit[1]);
+    const unit = cacheParsedSizeLimit[2];
+    switch(unit) {
+      case 'G':
+        size *= 1000;
+      case 'M':
+        size *= 1000 * 1000;
+        break;
+      case 'Gi':
+        size *= 1024;
+      case 'M':
+        size *= 1024 * 1024;
+        break;
+    }
+    return size;
+  }
 }
+cache.sizeLimit = parseSize(cache.sizeLimit);
+cache.minFree = parseSize(cache.minFree);
+
+// apply a safety margin (10% or 100M max)
+cache.sizeLimit -= Math.min(cache.sizeLimit * 0.1, 100 * 1000 * 1000);
 
 const configBlocks = [];
 
 configBlocks.push(`
-proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:10m max_size=${cache.sizeLimit} inactive=${cache.expiry} use_temp_path=off;
+# ${cache.sizeLimit / 1000 / 1000}M max_size, ${cache.minFree / 1000 / 1000}M min_free
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:10m max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.expiry} use_temp_path=off;
 proxy_cache_valid 200 302 ${cache.expiry};
 
 map $request_uri $uri_path {
@@ -37,7 +59,7 @@ server {
   proxy_buffering on;
 
   add_header Cache-Control public;
-  expires 60m;
+  expires 120m;
 
   location / {
     limit_except GET {

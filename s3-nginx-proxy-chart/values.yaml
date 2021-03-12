@@ -15,8 +15,9 @@ virtualHosts:
 
 cache:
   # medium: Memory
-  sizeLimit: 5Gi
-  expiry: 60m
+  sizeLimit: 500M
+  expiry: 120m
+  minFree: 4G
 
 kind: Deployment # DaemonSet is also supported
 replicaCount: 1
