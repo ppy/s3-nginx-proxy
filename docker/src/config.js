@@ -4,7 +4,13 @@ const S3_ACCESS_KEY = fs.readFileSync("/etc/s3-credentials/s3AccessKey").toStrin
 const S3_SECRET_KEY = fs.readFileSync("/etc/s3-credentials/s3SecretKey").toString().trim();
 const virtualHosts = require("/etc/proxy-config/virtualhosts.json");
 
-const cache = require("/etc/proxy-config/cache.json");
+const cache = {
+  sizeLimit: "500M",
+  inactiveExpiry: "120m",
+  minFree: "4G",
+  defaultCacheLength: "15m",
+  ...require("/etc/proxy-config/cache.json"),
+};
 
 // parse kubernetes-style volume size to nginx
 function parseSize(kubernetesSize) {
@@ -37,8 +43,7 @@ const configBlocks = [];
 
 configBlocks.push(`
 # ${cache.sizeLimit / 1000 / 1000}M max_size, ${cache.minFree / 1000 / 1000}M min_free
-proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:10m max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.expiry} use_temp_path=off;
-proxy_cache_valid 200 302 ${cache.expiry};
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:10m max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.inactiveExpiry} use_temp_path=off;
 
 map $request_uri $uri_path {
   "~^(?P<path>.*?)(\\?.*)*$"  $path;
@@ -48,6 +53,13 @@ include resolvers.conf;
 `);
 
 for(const virtualHost of virtualHosts) {
+  const vhostCache = {
+    any: cache.defaultCacheLength,
+    ...virtualHost.cache,
+  };
+  const vhostCacheNginx = Object.entries(vhostCache)
+    .map(([code, expiry]) => `  proxy_cache_valid ${code} ${expiry};`)
+    .join("\n");
   configBlocks.push(`
 server {
   listen 0.0.0.0:80;
@@ -58,8 +70,10 @@ server {
   proxy_cache_key "${virtualHost.bucket}$request_uri";
   proxy_buffering on;
 
+${vhostCacheNginx}
+
   add_header Cache-Control public;
-  expires 120m;
+  expires ${vhostCache["200"] ? vhostCache["200"] : vhostCache.any};
 
   location / {
     limit_except GET {

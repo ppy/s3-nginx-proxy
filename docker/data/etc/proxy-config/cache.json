@@ -1,5 +1,6 @@
 {
   "sizeLimit": "500M",
-  "expiry": "120m",
-  "minFree": "4G"
+  "inactiveExpiry": "12h",
+  "minFree": "4G",
+  "defaultCacheLength": "15m"
 }

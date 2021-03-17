@@ -12,12 +12,21 @@ virtualHosts:
     bucket: a.ppy.sh
     region: us-west-1
     defaultPath: /blank.png
+    cache:
+      200: 60m
+  - hostnames:
+      - assets.ppy.sh
+    bucket: assets.ppy.sh
+    region: us-west-1
+    cache:
+      200: 336h
 
 cache:
   # medium: Memory
   sizeLimit: 500M
-  expiry: 120m
+  inactiveExpiry: 12h
   minFree: 4G
+  defaultCacheLength: 15m
 
 kind: Deployment # DaemonSet is also supported
 replicaCount: 1
