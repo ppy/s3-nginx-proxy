@@ -91,10 +91,10 @@ ${vhostCacheNginx}
     ${virtualHost.defaultPath ? `error_page 403 @fallback;` : ""}
     ${virtualHost.defaultPath ? `error_page 404 @fallback;` : ""}
 
-    proxy_set_header       Accept-Encoding "";
-    proxy_set_header       Date            "$now";
-    proxy_set_header       Host            "${virtualHost.bucket}.s3.amazonaws.com";
-    proxy_set_header       Authorization   "AWS ${S3_ACCESS_KEY}:$aws_signature";
+    proxy_set_header       Content-Type  "";
+    proxy_set_header       Date          "$now";
+    proxy_set_header       Host          "${virtualHost.bucket}.s3.amazonaws.com";
+    proxy_set_header       Authorization "AWS ${S3_ACCESS_KEY}:$aws_signature";
     proxy_intercept_errors on;
     proxy_pass             "https://s3-${virtualHost.region}.amazonaws.com$uri_path";
   }
