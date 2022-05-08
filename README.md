@@ -10,6 +10,7 @@ A feature-rich Amazon S3 NGINX-based proxy, running in Docker and Kubernetes.
 - Multiple regions
 - Shared cache
 - Auto-reload after every configuration update (in production too)
+- Single-key cache purge support (using HTTP DELETE)
 
 # Usage
 
@@ -40,6 +41,13 @@ Start the NGINX and config generator containers with `docker-compose up -d`.
 ## Kubernetes (Helm)
 
 Edit your AWS credentials, proxy and ingress config in `s3-nginx-proxy-chart/values.yaml` and deploy like any other Helm chart.
+
+## Purge configuration
+
+Single files can be purged from cache using the HTTP `DELETE` method.
+
+By default, this is enabled to anyone with no authentication.  
+Authentication can be enabled by setting `purgeAuthorizationKey` in the cache config and using the HTTP `Authorization` header.
 
 # Contributing
 

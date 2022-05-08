@@ -9,6 +9,7 @@ const cache = {
   inactiveExpiry: "120m",
   minFree: "4G",
   defaultCacheLength: "15m",
+  purgeAuthorizationKey: "",
   ...require("/etc/proxy-config/cache.json"),
 };
 
@@ -42,7 +43,7 @@ cache.sizeLimit -= Math.min(cache.sizeLimit * 0.1, 100 * 1000 * 1000);
 const configBlocks = [];
 
 configBlocks.push(`
-# ${cache.sizeLimit / 1000 / 1000}M max_size, ${cache.minFree / 1000 / 1000}M min_free
+# ${cache.sizeLimit / 1000 / 1000}M max_size, ${cache.minFree / 1000 / 1000}M min_free
 proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:10m max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.inactiveExpiry} use_temp_path=off;
 
 map $request_uri $uri_path {
@@ -76,8 +77,16 @@ ${vhostCacheNginx}
   expires ${vhostCache["200"] ? vhostCache["200"] : vhostCache.any};
 
   location / {
-    limit_except GET {
-      deny all;
+    if ($request_method !~ ^(GET|DELETE)$) {
+      return 403;
+    }
+
+    if ($request_method = DELETE) {
+      set $lua_purge_path "/var/cache/nginx/";
+      set $lua_purge_levels "1:2";
+      set $lua_purge_cache_key "${virtualHost.bucket}$request_uri";
+      set $lua_purge_authorization_key "${cache.purgeAuthorizationKey}";
+      content_by_lua_file /srv/purge.lua;
     }
 
     set_by_lua_block $uri_path {
