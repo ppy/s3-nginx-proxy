@@ -98,7 +98,7 @@ ${vhostCacheNginx}
     set_encode_base64 $aws_signature  "$aws_signature";
 
     error_page 404 @fallback;
-    error_page 403 @fallback;
+    error_page 403 =404 @fallback;
 
     proxy_set_header       Content-Type  "";
     proxy_set_header       Date          "$now";
