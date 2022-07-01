@@ -97,8 +97,8 @@ ${vhostCacheNginx}
     set_hmac_sha1     $aws_signature  "${S3_SECRET_KEY}" "$string_to_sign";
     set_encode_base64 $aws_signature  "$aws_signature";
 
-    ${virtualHost.defaultPath ? `error_page 403 @fallback;` : ""}
-    ${virtualHost.defaultPath ? `error_page 404 @fallback;` : ""}
+    error_page 404 @fallback;
+    error_page 403 @fallback;
 
     proxy_set_header       Content-Type  "";
     proxy_set_header       Date          "$now";
@@ -108,12 +108,14 @@ ${vhostCacheNginx}
     proxy_pass             "https://s3-${virtualHost.region}.amazonaws.com$uri_path";
   }
 
-  ${virtualHost.defaultPath ? `
-    location @fallback {
+  location @fallback {
+    ${virtualHost.defaultPath ? `
       rewrite ^ "${virtualHost.defaultPath}";
       set $uri_path "${virtualHost.defaultPath}";
-    }
-  `: ""}
+    ` : `
+      internal;
+    `}
+  }
 }
 `);
 }
