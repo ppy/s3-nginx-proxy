@@ -61,6 +61,7 @@ for(const virtualHost of virtualHosts) {
   const vhostCacheNginx = Object.entries(vhostCache)
     .map(([code, expiry]) => `  proxy_cache_valid ${code} ${expiry};`)
     .join("\n");
+  const upstream = virtualHost.upstream || `s3-${virtualHost.region}.amazonaws.com`;
   configBlocks.push(`
 server {
   listen 0.0.0.0:80;
@@ -102,10 +103,10 @@ ${vhostCacheNginx}
 
     proxy_set_header       Content-Type  "";
     proxy_set_header       Date          "$now";
-    proxy_set_header       Host          "${virtualHost.bucket}.s3.amazonaws.com";
+    proxy_set_header       Host          "${virtualHost.bucket}.${upstream}";
     proxy_set_header       Authorization "AWS ${S3_ACCESS_KEY}:$aws_signature";
     proxy_intercept_errors on;
-    proxy_pass             "https://s3-${virtualHost.region}.amazonaws.com$uri_path";
+    proxy_pass             "https://${upstream}$uri_path";
   }
 
   location @fallback {
