@@ -68,7 +68,7 @@ server {
   server_name "${virtualHost.hostnames.join('" "')}";
 
   proxy_cache cache;
-  proxy_cache_key "${virtualHost.bucket}$request_uri";
+  proxy_cache_key "${virtualHost.bucket}$uri_path$args";
   proxy_buffering on;
 
 ${vhostCacheNginx}
@@ -84,7 +84,7 @@ ${vhostCacheNginx}
     if ($request_method = DELETE) {
       set $lua_purge_path "/var/cache/nginx/";
       set $lua_purge_levels "1:2";
-      set $lua_purge_cache_key "${virtualHost.bucket}$request_uri";
+      set $lua_purge_cache_key "${virtualHost.bucket}$uri_path$args";
       set $lua_purge_authorization_key "${cache.purgeAuthorizationKey}";
       content_by_lua_file /srv/purge.lua;
     }
