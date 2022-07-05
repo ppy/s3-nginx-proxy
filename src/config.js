@@ -69,6 +69,7 @@ for(const virtualHost of virtualHosts) {
       set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$uri_path";
       set_hmac_sha1     $aws_signature  "${secret.secretKey}" "$string_to_sign";
       set_encode_base64 $aws_signature  "$aws_signature";
+      proxy_set_header  Date            "$now";
       proxy_set_header  Authorization   "AWS ${secret.accessKey}:$aws_signature";
     `;
   }
@@ -116,7 +117,6 @@ ${vhostCacheNginx}
     error_page 403 =404 @fallback;
 
     proxy_set_header       Content-Type  "";
-    proxy_set_header       Date          "$now";
     proxy_set_header       Host          "${virtualHost.bucket}.${upstream}";
     proxy_intercept_errors on;
     proxy_pass             "https://${upstream}$uri_path";
