@@ -58,7 +58,7 @@ For example, endpoint for DigitalOcean Spaces in region NYC3 is `nyc3.digitaloce
 
 ## 2022.705.0
 
-Secrets have been moved to `./data/etc/proxy-config/secrets.json`.
+Secrets have been moved to `./data/etc/proxy-config/secrets.json`, and key for each secret set need to be added to the virtual hosts config (see default `./data/etc/proxy-config/virtualhosts.json`).
 
 # Contributing
 
