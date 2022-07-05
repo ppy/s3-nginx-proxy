@@ -54,6 +54,8 @@ S3 endpoint is computed from the `region` property if you're using Amazon S3. Fo
 
 For example, endpoint for DigitalOcean Spaces in region NYC3 is `nyc3.digitaloceanspaces.com`.
 
+Be aware however that you will not be benifitting of the added security of the Amazon S3 very granular permissions (may make your bucket listing public!).
+
 # Breaking Changes
 
 ## 2022.705.0
