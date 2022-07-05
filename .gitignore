@@ -1,2 +1,2 @@
-docker/data/etc/nginx/conf.d/s3-proxy.conf
-docker/data/etc/proxy-config/secrets.json
+data/etc/nginx/conf.d/s3-proxy.conf
+data/etc/proxy-config/secrets.json
