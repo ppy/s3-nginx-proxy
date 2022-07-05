@@ -33,14 +33,13 @@ Granting too much permissions may lead to security risks (such as listing the en
 
 ## Docker
 
-Change directory to `docker`.  
 Edit `./data/etc/proxy-config/virtualhosts.json` and `./data/etc/proxy-config/cache.json` to match your desired settings.
-Put your AWS credentials in `./data/etc/s3-credentials/s3AccessKey` and `./data/etc/s3-credentials/s3SecretKey`.
+Put your AWS credentials in `./data/etc/proxy-config/secrets.json` (see template in `./data/etc/proxy-config/secrets.json.example`).
 Start the NGINX and config generator containers with `docker-compose up -d`.
 
 ## Kubernetes (Helm)
 
-Edit your AWS credentials, proxy and ingress config in `s3-nginx-proxy-chart/values.yaml` and deploy like any other Helm chart.
+Helm chart is available at https://github.com/ppy/helm-charts/tree/master/osu/s3-nginx-proxy
 
 ## Purge configuration
 
@@ -48,6 +47,18 @@ Single files can be purged from cache using the HTTP `DELETE` method.
 
 By default, this is enabled to anyone with no authentication.  
 Authentication can be enabled by setting `purgeAuthorizationKey` in the cache config and using the HTTP `Authorization` header.
+
+## Third-Party S3 Providers
+
+S3 endpoint is computed from the `region` property if you're using Amazon S3. For other providers, `endpoint` can be used instead.
+
+For example, endpoint for DigitalOcean Spaces in region NYC3 is `nyc3.digitaloceanspaces.com`.
+
+# Breaking Changes
+
+## 2022.705.0
+
+Secrets have been moved to `./data/etc/proxy-config/secrets.json`.
 
 # Contributing
 

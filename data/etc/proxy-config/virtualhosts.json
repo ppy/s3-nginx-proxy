@@ -13,7 +13,7 @@
   },
   {
     "bucket": "assets.ppy.sh",
-    "region": "us-west-1",
+    "endpoint": "s3-us-west-1.amazonaws.com",
     "hostnames": [
       "assets.ppy.sh"
     ],
