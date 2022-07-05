@@ -50,7 +50,7 @@ Authentication can be enabled by setting `purgeAuthorizationKey` in the cache co
 
 ## Third-Party S3 Providers
 
-S3 endpoint is computed from the `region` property if you're using Amazon S3. For other providers, `endpoint` can be used instead.
+S3 endpoint is computed from the `region` property if you're using Amazon S3. For other providers, `upstream` can be used instead.
 
 For example, endpoint for DigitalOcean Spaces in region NYC3 is `nyc3.digitaloceanspaces.com`.
 
