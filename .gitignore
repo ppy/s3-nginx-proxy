@@ -1,3 +1,2 @@
 docker/data/etc/nginx/conf.d/s3-proxy.conf
-docker/data/etc/s3-credentials/s3AccessKey
-docker/data/etc/s3-credentials/s3SecretKey
+docker/data/etc/proxy-config/secrets.json

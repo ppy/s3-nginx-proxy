@@ -8,7 +8,8 @@
     "defaultPath": "/blank.png",
     "cache": {
       "200": "60m"
-    }
+    },
+    "secrets": "s3"
   },
   {
     "bucket": "assets.ppy.sh",
@@ -18,6 +19,7 @@
     ],
     "cache": {
       "200": "336h"
-    }
+    },
+    "secrets": "s3"
   }
 ]

@@ -1,7 +1,6 @@
 const fs = require("fs");
 
-const S3_ACCESS_KEY = fs.readFileSync("/etc/s3-credentials/s3AccessKey").toString().trim();
-const S3_SECRET_KEY = fs.readFileSync("/etc/s3-credentials/s3SecretKey").toString().trim();
+const secrets = require("/etc/proxy-config/secrets.json");
 const virtualHosts = require("/etc/proxy-config/virtualhosts.json");
 
 const cache = {
@@ -61,7 +60,24 @@ for(const virtualHost of virtualHosts) {
   const vhostCacheNginx = Object.entries(vhostCache)
     .map(([code, expiry]) => `  proxy_cache_valid ${code} ${expiry};`)
     .join("\n");
+
+  const secret = secrets[virtualHost.secrets];
+  let authNginx = "";
+  if (secret) {
+    authNginx = `
+      set_by_lua        $now            "return ngx.cookie_time(ngx.time())";
+      set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$uri_path";
+      set_hmac_sha1     $aws_signature  "${secret.secretKey}" "$string_to_sign";
+      set_encode_base64 $aws_signature  "$aws_signature";
+      proxy_set_header  Authorization   "AWS ${secret.accessKey}:$aws_signature";
+    `;
+  }
+  else if (virtualHost.secrets) {
+    throw new Error('Missing secret for ' + virtualHost.hostnames.join(','));
+  }
+
   const upstream = virtualHost.upstream || `s3-${virtualHost.region}.amazonaws.com`;
+
   configBlocks.push(`
 server {
   listen 0.0.0.0:80;
@@ -93,10 +109,8 @@ ${vhostCacheNginx}
     set_by_lua_block $uri_path {
       return ngx.var.uri_path:gsub("+", "%%2B");
     }
-    set_by_lua        $now            "return ngx.cookie_time(ngx.time())";
-    set               $string_to_sign "GET\\n\\n\\n\${now}\\n/${virtualHost.bucket}$uri_path";
-    set_hmac_sha1     $aws_signature  "${S3_SECRET_KEY}" "$string_to_sign";
-    set_encode_base64 $aws_signature  "$aws_signature";
+
+    ${authNginx}
 
     error_page 404 @fallback;
     error_page 403 =404 @fallback;
@@ -104,7 +118,6 @@ ${vhostCacheNginx}
     proxy_set_header       Content-Type  "";
     proxy_set_header       Date          "$now";
     proxy_set_header       Host          "${virtualHost.bucket}.${upstream}";
-    proxy_set_header       Authorization "AWS ${S3_ACCESS_KEY}:$aws_signature";
     proxy_intercept_errors on;
     proxy_pass             "https://${upstream}$uri_path";
   }
