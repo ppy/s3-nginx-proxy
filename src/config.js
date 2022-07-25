@@ -127,7 +127,7 @@ ${vhostCacheNginx}
       rewrite ^ "${virtualHost.defaultPath}";
       set $uri_path "${virtualHost.defaultPath}";
     ` : `
-      internal;
+      return 404;
     `}
   }
 }
