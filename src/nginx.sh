@@ -8,6 +8,13 @@ sed -i -E "s/^([\t| ]{0,})access_log.+$/\1access_log off;/"       /etc/nginx/ngi
 echo 'Starting nginx config script...'
 node /srv/config.js
 
+echo 'Validating nginx config...'
+openresty -p /var/lib/nginx -c /etc/nginx/nginx.conf -g 'daemon off;' -t
+if [[ $? -ne 0 ]]; then
+  echo 'nginx config validation failed, exiting...'
+  exit 1
+fi
+
 echo 'Starting nginx...'
 openresty -p /var/lib/nginx -c /etc/nginx/nginx.conf -g 'daemon off;' &
 PID=$!
@@ -16,6 +23,14 @@ PID=$!
 {
   while true; do
     inotifywait -r -e modify,move,create,delete /etc/nginx/
+    echo 'Detected an nginx config update, running validation...'
+
+    openresty -p /var/lib/nginx -c /etc/nginx/nginx.conf -g 'daemon off;' -t
+    if [[ $? -ne 0 ]]; then
+      echo 'nginx config validation failed, not reloading'
+      continue
+    fi
+
     echo 'Reloading nginx following config update...'
     kill -HUP $PID
   done
