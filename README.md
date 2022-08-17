@@ -6,11 +6,13 @@ A feature-rich Amazon S3 NGINX-based proxy, running in Docker and Kubernetes.
 
 - Authentication to private buckets
 - Multiple buckets
-- Multiple domains per buckets
+- Multiple domains per bucket (with shared cache)
 - Multiple regions
-- Shared cache
+- Cache duration based on HTTP status
 - Auto-reload after every configuration update (in production too)
 - Single-key cache purge support (using HTTP DELETE)
+- Cloudflare cache purging support
+- Third-party S3 providers support
 
 # Usage
 
@@ -45,8 +47,17 @@ Helm chart is available at https://github.com/ppy/helm-charts/tree/master/osu/s3
 
 Single files can be purged from cache using the HTTP `DELETE` method.
 
-By default, this is enabled to anyone with no authentication.  
+By default, this is enabled to everyone with no authentication.  
 Authentication can be enabled by setting `purgeAuthorizationKey` in the cache config and using the HTTP `Authorization` header.
+
+### Cloudflare purging
+
+If Cloudflare is placed in front of s3-nginx-proxy, files can also be purged on Cloudflare's CDN using their API.
+
+It can be enabled by setting the following variables in the cache config:
+- `purgeCloudflareApiToken` must be a purging-enabled token.  
+  Head to your [account's API Keys](https://dash.cloudflare.com/profile/api-tokens) and create a custom token with the `Zone > Cache Purge > Purge` permission enabled on the desired zone.
+- `purgeCloudflareZoneId` is found on your domain's home page on your Cloudflare dashboard.
 
 ## Third-Party S3 Providers
 
