@@ -120,6 +120,9 @@ ${vhostCacheNginx}
     proxy_set_header       Host          "${virtualHost.bucket}.${upstream}";
     proxy_intercept_errors on;
     proxy_pass             "https://${upstream}$uri_path";
+
+    proxy_ssl_verify              on;
+    proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
   }
 
   location @fallback {
