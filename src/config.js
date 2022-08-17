@@ -9,6 +9,8 @@ const cache = {
   minFree: "4G",
   defaultCacheLength: "15m",
   purgeAuthorizationKey: "",
+  purgeCloudflareZoneId: "",
+  purgeCloudflareApiToken: "",
   ...require("/etc/proxy-config/cache.json"),
 };
 
@@ -50,6 +52,8 @@ map $request_uri $uri_path {
 }
 
 include resolvers.conf;
+
+lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
 `);
 
 for(const virtualHost of virtualHosts) {
@@ -104,6 +108,8 @@ ${vhostCacheNginx}
       set $lua_purge_levels "1:2";
       set $lua_purge_cache_key "${virtualHost.bucket}$uri_path$args";
       set $lua_purge_authorization_key "${cache.purgeAuthorizationKey}";
+      set $lua_purge_cloudflare_zoneid "${cache.purgeCloudflareZoneId}";
+      set $lua_purge_cloudflare_apitoken "${cache.purgeCloudflareApiToken}";
       content_by_lua_file /srv/purge.lua;
     }
 
