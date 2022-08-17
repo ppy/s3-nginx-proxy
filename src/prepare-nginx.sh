@@ -4,7 +4,7 @@ echo resolver $(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.con
 
 sed -i -E "s/^([\t| ]{0,})error_log.+$/\1error_log stderr warn;/"                                            /etc/nginx/nginx.conf
 sed -i -E "s/^([\t| ]{0,})access_log.+$/\1access_log off;/"                                                  /etc/nginx/nginx.conf
-sed -i -E "s~^([\t| ]{0,})include /etc/nginx/conf\.d/\*\.conf;$~\1include /etc/nginx/conf.d/s3-proxy.conf;~" /etc/nginx/nginx.conf
+sed -i -E "s~^([\t| ]{0,})include /etc/nginx/http\.d/\*\.conf;$~\1include /etc/nginx/conf.d/s3-proxy.conf;~" /etc/nginx/nginx.conf
 
 echo 'Starting nginx config script...'
 node /srv/config.js
