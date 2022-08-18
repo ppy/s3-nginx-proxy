@@ -113,6 +113,8 @@ ${vhostCacheNginx}
       content_by_lua_file /srv/purge.lua;
     }
 
+    ${(virtualHost.locationSnippet || "").split("\n").join("\n    ")}
+
     set_by_lua_block $uri_path {
       return ngx.var.uri_path:gsub("+", "%%2B");
     }

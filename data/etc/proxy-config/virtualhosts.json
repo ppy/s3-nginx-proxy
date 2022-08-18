@@ -9,7 +9,8 @@
     "cache": {
       "200": "60m"
     },
-    "secrets": "s3"
+    "secrets": "s3",
+    "locationSnippet": "if ($uri_path ~ ^/([0-9]+)_.*$) {\n  set $uri_path /$1;\n}"
   },
   {
     "bucket": "assets.ppy.sh",
