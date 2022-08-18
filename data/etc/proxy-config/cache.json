@@ -3,5 +3,7 @@
   "inactiveExpiry": "12h",
   "minFree": "4G",
   "defaultCacheLength": "15m",
-  "purgeAuthorizationKey": ""
+  "purgeAuthorizationKey": "",
+  "purgeCloudflareZoneId": "",
+  "purgeCloudflareApiToken": ""
 }

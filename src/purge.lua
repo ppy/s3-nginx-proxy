@@ -6,6 +6,8 @@
 --
 
 local md5 = ngx.md5
+local httpc = require("resty.http").new()
+httpc:set_timeout(5000)
 
 local function file_exists(name)
         local f = io.open(name, "r")
@@ -62,6 +64,19 @@ if ngx ~= nil then
         else
                 local filename = cache_filename(ngx.var.lua_purge_path, ngx.var.lua_purge_levels, ngx.var.lua_purge_cache_key)
                 purge(filename)
+
+                if ngx.var.lua_purge_cloudflare_zoneid ~= "" and ngx.var.lua_purge_cloudflare_apitoken ~= "" then
+                        local headers = { ["Authorization"] = "Bearer " .. ngx.var.lua_purge_cloudflare_apitoken, ["Content-Type"] = "application/json" }
+                        local url = "https://" .. ngx.var.host .. ngx.var.request_uri
+                        local body = "{\"files\":[\"" .. url:gsub("\"", "\\\"") .. "\"]}"
+                        local res, err = httpc:request_uri("https://api.cloudflare.com/client/v4/zones/" .. ngx.var.lua_purge_cloudflare_zoneid .. "/purge_cache", { method = "DELETE", headers = headers, body = body })
+                        if not res then
+                                ngx.log(ngx.ERR, "request for purging " .. url .. " failed: ", err)
+                        elseif res.status ~= 200 then
+                                ngx.log(ngx.ERR, "request for purging " .. url .. " failed (" .. res.status .. "): " .. res.status, res.body)
+                        end
+                end
+
                 ngx.status = ngx.HTTP_OK
                 ngx.say("OK")
         end
