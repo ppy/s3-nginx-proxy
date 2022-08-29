@@ -2,6 +2,7 @@
   "sizeLimit": "500M",
   "inactiveExpiry": "12h",
   "minFree": "4G",
+  "keysZoneSize": "10m",
   "defaultCacheLength": "15m",
   "purgeAuthorizationKey": "",
   "purgeCloudflareZoneId": "",

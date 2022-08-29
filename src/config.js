@@ -7,6 +7,7 @@ const cache = {
   sizeLimit: "500M",
   inactiveExpiry: "120m",
   minFree: "4G",
+  keysZoneSize: "10m",
   defaultCacheLength: "15m",
   purgeAuthorizationKey: "",
   purgeCloudflareZoneId: "",
@@ -45,7 +46,7 @@ const configBlocks = [];
 
 configBlocks.push(`
 # ${cache.sizeLimit / 1000 / 1000}M max_size, ${cache.minFree / 1000 / 1000}M min_free
-proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:10m max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.inactiveExpiry} use_temp_path=off;
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:${cache.keysZoneSize} max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.inactiveExpiry} use_temp_path=off;
 
 map $request_uri $uri_path {
   "~^(?P<path>.*?)(\\?.*)*$"  $path;
