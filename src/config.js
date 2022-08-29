@@ -82,6 +82,7 @@ for(const virtualHost of virtualHosts) {
   }
 
   const upstream = virtualHost.upstream || `s3-${virtualHost.region}.amazonaws.com`;
+  const cacheKey = `${virtualHost.cacheKey || `${virtualHost.bucket}$uri_path$args`}`;
 
   configBlocks.push(`
 server {
@@ -90,7 +91,7 @@ server {
   server_name "${virtualHost.hostnames.join('" "')}";
 
   proxy_cache cache;
-  proxy_cache_key "${virtualHost.bucket}$uri_path$args";
+  proxy_cache_key "${cacheKey}";
   proxy_buffering on;
 
 ${vhostCacheNginx}
@@ -106,7 +107,7 @@ ${vhostCacheNginx}
     if ($request_method = DELETE) {
       set $lua_purge_path "/var/cache/nginx/";
       set $lua_purge_levels "1:2";
-      set $lua_purge_cache_key "${virtualHost.bucket}$uri_path$args";
+      set $lua_purge_cache_key "${cacheKey}";
       set $lua_purge_authorization_key "${cache.purgeAuthorizationKey}";
       set $lua_purge_cloudflare_zoneid "${cache.purgeCloudflareZoneId}";
       set $lua_purge_cloudflare_apitoken "${cache.purgeCloudflareApiToken}";
