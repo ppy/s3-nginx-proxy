@@ -39,8 +39,8 @@ function parseSize(kubernetesSize) {
 cache.sizeLimit = parseSize(cache.sizeLimit);
 cache.minFree = parseSize(cache.minFree);
 
-// apply a safety margin (10% or 100M max)
-cache.sizeLimit -= Math.min(cache.sizeLimit * 0.1, 100 * 1000 * 1000);
+// apply a safety margin (10% or 1G max)
+cache.sizeLimit -= Math.min(cache.sizeLimit * 0.1, 1000 * 1000 * 1000);
 
 const configBlocks = [];
 
