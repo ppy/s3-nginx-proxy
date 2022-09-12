@@ -13,6 +13,7 @@ A feature-rich Amazon S3 NGINX-based proxy, running in Docker and Kubernetes.
 - Single-key cache purge support (using HTTP DELETE)
 - Cloudflare cache purging support
 - Third-party S3 providers support
+- Observability (Prometheus-compatible)
 
 # Usage
 
@@ -66,6 +67,15 @@ S3 endpoint is computed from the `region` property if you're using Amazon S3. Fo
 For example, endpoint for DigitalOcean Spaces in region NYC3 is `nyc3.digitaloceanspaces.com`.
 
 Be aware however that you will not be benifitting of the added security of the Amazon S3 very granular permissions (may make your bucket listing public!).
+
+## Observability
+
+A Prometheus-compatible metrics endpoint can be enabled in `metrics.json`.  
+The following metrics are exposed:
+- `nginx_http_requests_total`: Number of HTTP requests (counter)
+- `nginx_http_request_duration_seconds`: HTTP request latency (histogram)
+- `nginx_http_connections`: Number of HTTP connections (gauge)
+- `nginx_upstream_cache_status`: Number of HTTP requests per upstream cache status (counter)
 
 # Breaking Changes
 

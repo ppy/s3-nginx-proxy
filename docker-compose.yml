@@ -5,6 +5,7 @@ services:
     image: pppy/s3-nginx-proxy
     ports:
       - 127.0.0.1:80:80
+      - 127.0.0.1:8125:8125
     volumes:
       - ./data/etc/nginx/conf.d:/etc/nginx/conf.d
       - ./data/etc/proxy-config:/etc/proxy-config

@@ -8,7 +8,7 @@ RUN apk add --no-cache bash nodejs inotify-tools nginx openresty
 FROM base AS opm
 
 RUN apk add --no-cache openresty-opm
-RUN opm get ledgetech/lua-resty-http
+RUN opm get ledgetech/lua-resty-http knyar/nginx-lua-prometheus
 
 FROM base
 

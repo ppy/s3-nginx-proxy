@@ -2,8 +2,10 @@ const fs = require("fs");
 
 const secrets = require("/etc/proxy-config/secrets.json");
 const virtualHosts = require("/etc/proxy-config/virtualhosts.json");
+const metrics = require("/etc/proxy-config/metrics.json");
 
 const cache = {
+  cachePath: "/var/cache/nginx",
   sizeLimit: "500M",
   inactiveExpiry: "120m",
   minFree: "4G",
@@ -46,7 +48,7 @@ const configBlocks = [];
 
 configBlocks.push(`
 # ${cache.sizeLimit / 1000 / 1000}M max_size, ${cache.minFree / 1000 / 1000}M min_free
-proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=cache:${cache.keysZoneSize} max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.inactiveExpiry} use_temp_path=off;
+proxy_cache_path ${cache.cachePath} levels=1:2 keys_zone=cache:${cache.keysZoneSize} max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.inactiveExpiry} use_temp_path=off;
 
 map $request_uri $uri_path {
   "~^(?P<path>.*?)(\\?.*)*$"  $path;
@@ -141,8 +143,59 @@ ${vhostCacheNginx}
       return 404;
     `}
   }
+
+  location /favicon.ico {
+    return 404;
+  }
 }
 `);
+}
+
+if (metrics && metrics.enabled) {
+  const allow = metrics.allow.map(address => `allow ${address};`).join("\n");
+  configBlocks.push(`
+    lua_shared_dict prometheus_metrics 10M;
+
+    init_worker_by_lua_block {
+      prometheus = require("prometheus").init("prometheus_metrics")
+
+      metric_requests = prometheus:counter(
+        "nginx_http_requests_total", "Number of HTTP requests", {"host", "status"})
+      metric_latency = prometheus:histogram(
+        "nginx_http_request_duration_seconds", "HTTP request latency", {"host"})
+      metric_connections = prometheus:gauge(
+        "nginx_http_connections", "Number of HTTP connections", {"state"})
+
+      metric_upstream_cache_status = prometheus:counter(
+        "nginx_upstream_cache_status", "Number of HTTP requests per upstream cache status", {"host", "status"})
+    }
+
+    log_by_lua_block {
+      metric_requests:inc(1, {ngx.var.server_name, ngx.var.status})
+      metric_latency:observe(tonumber(ngx.var.request_time), {ngx.var.server_name})
+
+      if (ngx.var.upstream_cache_status) then
+        metric_upstream_cache_status:inc(1, {ngx.var.server_name, ngx.var.upstream_cache_status})
+      end
+    }
+
+    server {
+      listen ${metrics.port};
+
+      deny all;
+
+      location ${metrics.location} {
+        ${allow}
+
+        content_by_lua_block {
+          metric_connections:set(ngx.var.connections_reading, {"reading"})
+          metric_connections:set(ngx.var.connections_waiting, {"waiting"})
+          metric_connections:set(ngx.var.connections_writing, {"writing"})
+          prometheus:collect()
+        }
+      }
+    }
+  `);
 }
 
 fs.writeFileSync("/etc/nginx/conf.d/s3-proxy.conf", configBlocks.join(""));

@@ -1,4 +1,5 @@
 {
+  "cachePath": "/var/cache/nginx",
   "sizeLimit": "500M",
   "inactiveExpiry": "12h",
   "minFree": "4G",

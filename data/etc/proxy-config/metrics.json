@@ -1,0 +1,6 @@
+{
+  "enabled": false,
+  "port": 8125,
+  "allow": ["0.0.0.0/0"],
+  "location": "/metrics"
+}
