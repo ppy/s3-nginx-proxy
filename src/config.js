@@ -47,17 +47,26 @@ cache.sizeLimit -= Math.min(cache.sizeLimit * 0.1, 4000 * 1000 * 1000);
 const configBlocks = [];
 
 configBlocks.push(`
+include resolvers.conf;
+
+lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+
 # ${cache.sizeLimit / 1000 / 1000}M max_size, ${cache.minFree / 1000 / 1000}M min_free
 proxy_cache_path ${cache.cachePath} levels=1:2 keys_zone=cache:${cache.keysZoneSize} max_size=${cache.sizeLimit} min_free=${cache.minFree} inactive=${cache.inactiveExpiry} use_temp_path=off;
 
 map $request_uri $uri_path {
   "~^(?P<path>.*?)(\\?.*)*$"  $path;
 }
-
-include resolvers.conf;
-
-lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
 `);
+
+if (virtualHosts.some((vhost) => vhost.forceImageMimeType)) {
+  configBlocks.push(`
+    map $upstream_http_content_type $image_type {
+      "~*image/.+" $upstream_http_content_type;
+      default image/jpeg;
+    }
+  `);
+}
 
 for(const virtualHost of virtualHosts) {
   const vhostCache = {
@@ -99,6 +108,8 @@ server {
 
 ${vhostCacheNginx}
 
+  ${virtualHost.forceImageMimeType ? 'add_header Content-Type $image_type always;' : ''}
+
   add_header Cache-Control public;
   expires ${vhostCache["200"] ? vhostCache["200"] : vhostCache.any};
 
@@ -130,6 +141,8 @@ ${vhostCacheNginx}
     proxy_set_header       Host          "${virtualHost.bucket}.${upstream}";
     proxy_intercept_errors on;
     proxy_pass             "https://${upstream}$uri_path";
+
+    ${virtualHost.forceImageMimeType ? 'proxy_hide_header Content-Type;' : ''}
 
     proxy_ssl_verify              on;
     proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
