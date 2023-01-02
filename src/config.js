@@ -96,6 +96,7 @@ for(const virtualHost of virtualHosts) {
 
   const upstream = virtualHost.upstream || `s3-${virtualHost.region}.amazonaws.com`;
   const cacheKey = `${virtualHost.cacheKey || `${virtualHost.bucket}$uri_path$args`}`;
+  const defaultStatusCode = virtualHost.defaultStatusCode || 404;
 
   configBlocks.push(`
 server {
@@ -135,8 +136,8 @@ ${vhostCacheNginx}
 
     ${authNginx}
 
-    error_page 404 =${virtualHost.defaultStatusCode || 404} @fallback;
-    error_page 403 =${virtualHost.defaultStatusCode || 404} @fallback;
+    error_page 404 =${defaultStatusCode} @fallback;
+    error_page 403 =${defaultStatusCode} @fallback;
 
     proxy_set_header       Content-Type  "";
     proxy_set_header       Host          "${virtualHost.bucket}.${upstream}";
@@ -154,7 +155,7 @@ ${vhostCacheNginx}
       rewrite ^ "${virtualHost.defaultPath}";
       set $uri_path "${virtualHost.defaultPath}";
     ` : `
-      return 404;
+      return ${defaultStatusCode};
     `}
   }
 
