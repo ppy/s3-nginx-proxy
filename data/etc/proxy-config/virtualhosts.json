@@ -6,6 +6,7 @@
       "a.ppy.sh"
     ],
     "defaultPath": "/blank.png",
+    "defaultStatusCode": 200,
     "cache": {
       "200": "60m"
     },

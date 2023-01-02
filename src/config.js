@@ -134,8 +134,8 @@ ${vhostCacheNginx}
 
     ${authNginx}
 
-    error_page 404 @fallback;
-    error_page 403 =404 @fallback;
+    error_page 404 =${virtualHost.defaultStatusCode || 404} @fallback;
+    error_page 403 =${virtualHost.defaultStatusCode || 404} @fallback;
 
     proxy_set_header       Content-Type  "";
     proxy_set_header       Host          "${virtualHost.bucket}.${upstream}";
