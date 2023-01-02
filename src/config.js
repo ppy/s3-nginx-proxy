@@ -14,6 +14,7 @@ const cache = {
   purgeAuthorizationKey: "",
   purgeCloudflareZoneId: "",
   purgeCloudflareApiToken: "",
+  resolvers: [],
   ...require("/etc/proxy-config/cache.json"),
 };
 
@@ -47,7 +48,7 @@ cache.sizeLimit -= Math.min(cache.sizeLimit * 0.1, 4000 * 1000 * 1000);
 const configBlocks = [];
 
 configBlocks.push(`
-include resolvers.conf;
+${cache.resolvers.length > 0 ? `resolver ${Array.isArray(cache.resolvers) ? cache.resolvers.join(' ') : cache.resolvers} ipv6=off` : `include resolvers.conf`};
 
 lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
 
