@@ -17,4 +17,5 @@ COPY ./src /srv
 
 STOPSIGNAL SIGQUIT
 
+ENTRYPOINT ["/srv/entrypoint.sh"]
 CMD ["/srv/nginx.sh"]
