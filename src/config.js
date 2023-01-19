@@ -32,7 +32,7 @@ function parseSize(kubernetesSize) {
         break;
       case 'Gi':
         size *= 1024;
-      case 'M':
+      case 'Mi':
         size *= 1024 * 1024;
         break;
     }
