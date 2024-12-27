@@ -112,6 +112,7 @@ ${vhostCacheNginx}
 
   ${virtualHost.forceImageMimeType ? 'add_header Content-Type $image_type always;' : ''}
 
+  add_header Cache-Control $upstream_http_cache_control;
   add_header Cache-Control public;
   expires ${vhostCache["200"] ? vhostCache["200"] : vhostCache.any};
 
